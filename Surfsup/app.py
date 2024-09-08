@@ -6,6 +6,7 @@ from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine, func
 import datetime as dt
+from datetime import datetime
 
 from flask import Flask, jsonify
 
@@ -97,15 +98,14 @@ def tobs():
 
     return jsonify(stations)
 
-@app.route("/api/v1.0/<start>")
-def start():
-    
+@app.route("/api/v1.0/<start_date>")
+def start(start_date):
     
     # Create our session (link) from Python to the DB
     session = Session(engine)
-
-    results = session.query([func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)]).filter(Measurement.date >= start.all)
-    # first thing to take start date and strip it. strptime -- make it in year month date format
+    
+    start_date = dt.strptime(start_date, "%Y-%m-%d")
+    results = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).filter(Measurement.date >= start_date).all()
 
     session.close()
 
@@ -114,20 +114,23 @@ def start():
 
     return jsonify(start)
 
-@app.route("/api/v1.0/<start>/<end>")
-def start_end():
+@app.route("/api/v1.0/<start_date>/<end_date>")
+def start_end(start_date, end_date):
+    
     # Create our session (link) from Python to the DB
     session = Session(engine)
-
-    results = 
-
-    session.close()
+    
+    start_date = datetime.strptime(start_date, "%Y-%m-%d")
+    end_date = datetime.strptime(end_date, "%Y-%m-%d")
+    
+    results = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).filter(Measurement.date >= start_date).filter(Measurement.date <= end_date).all()
 
     # Convert list of tuples into normal list
-    stations = list(np.ravel(results))
+    temperature_stats = list(np.ravel(results))
 
-    return jsonify(stations)
+    return jsonify(temperature_stats)
 
 
+session.close()
 
 
