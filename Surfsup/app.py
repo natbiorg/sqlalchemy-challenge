@@ -130,6 +130,8 @@ def start_end(start_date, end_date):
 
     return jsonify(temperature_stats)
 
+if __name__=="__main__":
+    app.run()
 
 session.close()
 
