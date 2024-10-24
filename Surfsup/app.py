@@ -44,8 +44,8 @@ def homepage():
         f"/api/v1.0/precipitation<br/>"
         f"/api/v1.0/stations<br/>"
         f"/api/v1.0/tobs<br/>"
-        f"/api/v1.0/<start><br/>"
-        f"/api/v1.0/<start>/<end>"
+        f"/api/v1.0/start<br/>"
+        f"/api/v1.0/start/end"
     )
 
 @app.route("/api/v1.0/precipitation")
@@ -58,14 +58,14 @@ def precipitation():
     session.close()
 
     # Convert list of tuples into normal list
-    precip = []
+    # precip = []
+    precip_dict  = {}
+      
     for date, prcp in results: 
-        precip_dict  = {}
-        precip_dict["date"] = date
-        precip_dict["prcp"] = prcp
-        precip.append(precip_dict)
-        
-    return jsonify(precip)
+        precip_dict[date] = prcp
+        # precip.append(precip_dict)
+    
+    return jsonify(precip_dict)
 
 
 @app.route("/api/v1.0/stations")
@@ -104,7 +104,7 @@ def start(start_date):
     # Create our session (link) from Python to the DB
     session = Session(engine)
     
-    start_date = dt.strptime(start_date, "%Y-%m-%d")
+    start_date = dt.datetime.strptime(start_date, "%Y-%m-%d")
     results = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).filter(Measurement.date >= start_date).all()
 
     session.close()
@@ -120,8 +120,8 @@ def start_end(start_date, end_date):
     # Create our session (link) from Python to the DB
     session = Session(engine)
     
-    start_date = datetime.strptime(start_date, "%Y-%m-%d")
-    end_date = datetime.strptime(end_date, "%Y-%m-%d")
+    start_date = dt.datetime.strptime(start_date, "%Y-%m-%d")
+    end_date = dt.datetime.strptime(end_date, "%Y-%m-%d")
     
     results = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).filter(Measurement.date >= start_date).filter(Measurement.date <= end_date).all()
 
